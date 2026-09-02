@@ -59,14 +59,13 @@ export default {
         }
     },
     methods: {
-        getOrganisations (domain) {
-            var url = this.api + '/organisations?nb=500&orderBy=' + encodeURIComponent('o_name ASC');
+        getOrganisations () {
+            console.log('search')
+            var url = this.api + '/organizations?nb=500&orderBy=' + encodeURIComponent('o_name ASC');
             if (this.organisation.name) {
                 url += '&q=' + this.organisation.name
             }
-            if (this.domain) {
-                url += '&domain=' + domain
-            }
+           
             fetch(url)
             .then(resp => resp.json())
             .then(json => {
@@ -85,14 +84,14 @@ export default {
             this.organisation.id = null
             this.organisation.type = null
             
-            if (this.organisation.length <= 1) {
+            if (this.organisation.name.length <= 1) {
                 this.organisations = []
             }
             if (event.inputType && event.inputType.indexOf('delete') >=0)
             {
                 return
             }
-            if (this.organisation.length === 2) {
+            if (this.organisation.name.length >= 2) {
                 this.getOrganisations()
                 return
             }
