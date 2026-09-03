@@ -1,5 +1,5 @@
 <template>
-    <div v-if="user">
+    <div class="access" v-if="user">
         <h1>Access request</h1>
         <h2>Your organisation</h2>
         <div><label>Name</label> 
@@ -19,11 +19,26 @@
             </select>
         </div>
         <h2>Your access right</h2>
+        <span style="max-height:30px;"><font-awesome-icon icon="fa-solid fa-clock" style="color:darkgreen;"></font-awesome-icon></span>
+        <template v-for="client in clients">
+            <div><h4>{{ client.name}}</h4>
+                <div v-for="role in roles[client.clientId].roles">
+                   <label>{{ role.title.en || role.name }}</label> 
+                  
+                    <span v-if="user.roles && user.roles[client.clientId] &&user.roles[client.clientId].indexOf(role.name) >= 0" style="color:green;" >
+                      <font-awesome-icon icon="fa-solid fa-check" /> 
+                </span>
+                </div>
+            </div>
+
+        </template>
     </div>
 </template>
 <script>
+import { FontAwesomeIcon } from '@/fontawesome';
 export default {
     name: 'FormaterreAccess',
+    components: {FontAwesomeIcon},
     props: {
         lang: {
             type: String,
@@ -43,7 +58,9 @@ export default {
             types: {},
             organisation: {id: null, type: null, name: null},
             organisations: [],
-            roles: {}
+            roles: {},
+            clients: {},
+            checkedRoles: []
         }
     },
     mounted () {
@@ -135,14 +152,37 @@ export default {
                 }
                 this.clients = json.clients
                 this.roles = json.roles
-
+                console.log(this.user.roles)
+                for(var client in this.roles) {
+                    console.log(client)
+                    console.log(this.roles[client])
+                    if (client  !== 'global') {
+                        this.roles[client].roles.forEach((role) => {
+                            console.log(role)
+                        })
+                    }
+                }
 
             })
         }
     }
 }
 </script>
+<style>
+svg.svg-inline--fa {
+  display: inline-block;
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+}
+svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
+  overflow: visible;
+  box-sizing: content-box;
+}
+
+</style>
 <style scoped>
+
 label {
     display:inline-block;
     width:180px;
