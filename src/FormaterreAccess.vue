@@ -1,23 +1,24 @@
 <template>
     <div v-if="user">
-        <h1>Demande d'accès</h1>
-    Hello {{ user.roles }}
-    <div><label>Organisation</label> 
-        <input v-model="organisation.id" />
-        <input v-model="organisation.name" @input="organisationUpdated($event)" > *
-            <!-- <em v-if="data.organizationMessage" style="color:darkred;">{{$t('at_least_3')}}</em> -->
-             <datalist id="organisations">
+        <h1>Access request</h1>
+        <h2>Your organisation</h2>
+        <div><label>Name</label> 
+
+        <input type="hidden" v-model="organisation.id" />
+        <input v-model="organisation.name" type="text" list="organisations" @input="organisationUpdated($event)" required> *
+            <datalist id="organisations">
                 <option v-for="org in organisations" :data-value="org.o_uid" >{{org.o_name}}<span v-if="org.o_short"> ({{org.o_short}})</span></option>
-             </datalist>
+            </datalist>
        
-    </div>
-    <div><label>Type</label>
-        {{ types }}
-        <select v-model="organisation.type">
-            <option value="">---</option>
-            <option v-for="tp in types" :value="tp.t_id">{{ tp.t_name }}</option>
-        </select>
-    </div>
+        </div>
+        <div><label>Type</label>
+        
+            <select v-model="organisation.type">
+                <option value="">---</option>
+                <option v-for="tp in types" :value="tp.t_id">{{ tp.t_name }}</option>
+            </select>
+        </div>
+        <h2>Your access right</h2>
     </div>
 </template>
 <script>
@@ -26,7 +27,7 @@ export default {
     props: {
         lang: {
             type: String,
-            default: 'fr'
+            default: 'en'
         },
         user: {
             type: Object,
@@ -69,13 +70,8 @@ export default {
             fetch(url)
             .then(resp => resp.json())
             .then(json => {
-                if (json.organisations) {
-                this.organisations = json.organisations
-                if (this.domain && data.value.organisations.length === 1) {
-                    this.organisation.name = this.organisations[0].o_name
-                    this.organisation.id = this.organisations[0].o_uid
-                    this.organisation.type = this.organisations[0].o_fk_type_id
-                }
+                if (json.organizations) {
+                    this.organisations = json.organizations
                 }
             })
         },
@@ -91,7 +87,7 @@ export default {
             {
                 return
             }
-            if (this.organisation.name.length >= 2) {
+            if (this.organisation.name.length == 2) {
                 this.getOrganisations()
                 return
             }
@@ -146,3 +142,12 @@ export default {
     }
 }
 </script>
+<style scoped>
+label {
+    display:inline-block;
+    width:180px;
+    text-align:right;
+    font-weight:700;
+    margin-right:5px;
+}
+</style>
