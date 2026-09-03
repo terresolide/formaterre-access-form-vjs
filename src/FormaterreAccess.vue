@@ -1,6 +1,10 @@
 <template>
     <div class="access" v-if="user">
         <h1>Access request</h1>
+        <div>Hello <b>{{ user.email }}</b>!</div>
+        <div style="margin-top:10px;display:block;">
+            Complete the information about your organization if necessary, then select the access rights you require.
+        </div>
         <h2>Your organisation</h2>
         <div><label>Name</label> 
 
@@ -19,19 +23,29 @@
             </select>
         </div>
         <h2>Your access right</h2>
-        <span style="max-height:30px;"><font-awesome-icon icon="fa-solid fa-clock" style="color:darkgreen;"></font-awesome-icon></span>
-        <template v-for="client in clients">
+         <template v-for="client in clients">
             <div><h4>{{ client.name}}</h4>
-                <div v-for="role in roles[client.clientId].roles">
-                   <label>{{ role.title.en || role.name }}</label> 
-                  
+                <div class="input-role" v-for="role in roles[client.clientId].roles">
+                    <label :title="role.description.en">{{ role.title.en || role.name }}</label> 
                     <span v-if="user.roles && user.roles[client.clientId] &&user.roles[client.clientId].indexOf(role.name) >= 0" style="color:green;" >
                       <font-awesome-icon icon="fa-solid fa-check" /> 
-                </span>
+                    </span>
+                    <span v-else-if="role.status === 'WAITING'" title="Request being processed">
+                        <font-awesome-icon icon="fa-solid fa-clock" ></font-awesome-icon>
+                    </span>
+                    <span v-else-if="role.status === 'REJECTED'" title="Your request has been rejected.">
+                        <font-awesome icon="fa-solid fa-close"></font-awesome>
+                    </span>
+                   
+                    <span v-else><input type="checkbox" v-model="checkedRoles" :value="client.clientId + '.' + role.name" /></span>
                 </div>
             </div>
 
         </template>
+        <h2>Motivation for the moderator</h2>
+        <textarea v-model="message"></textarea>
+       
+        <div style="width:600px;text-align:right;margin-top:20px;"><button :disabled="disabled">Send</button></div>
     </div>
 </template>
 <script>
@@ -48,6 +62,10 @@ export default {
             type: Object,
             default: null
         },
+        app: {
+            type: String,
+            default: 'vso-opt'
+        },
         api: {
             type: String,
             default: 'https://catalog.formater/api'
@@ -60,7 +78,16 @@ export default {
             organisations: [],
             roles: {},
             clients: {},
-            checkedRoles: []
+            checkedRoles: [],
+            message: '',
+            asking: false
+        }
+    },
+    computed: {
+        disabled () {
+            if (this.checkedRoles.length === 0) {
+                return true;
+            }
         }
     },
     mounted () {
@@ -77,6 +104,47 @@ export default {
         }
     },
     methods: {
+        accessRequest() {
+            this.asking = true
+            var location = URL.parse(window.location.href)
+            // remove role "view" if there is role "view download"
+             var postdata = {
+                email: user.email,
+                app: this.app,
+                domain: location.href,
+                message: this.message,
+                role: this.checkedRoles,
+                lang: this.lang,
+                organizationId: user.organization.id
+            }
+            var fdata = new URLSearchParams(postdata)
+            var url = config.state.tools + '/requests/ask'
+            fetch(url,{
+                method: 'POST',
+                body: fdata.toString(),
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }).then(resp => resp.json())
+            .then(json => {
+                this.asking = false
+                this.success = json.success
+                if (json.success && json.roles) {
+                    json.roles.forEach(function (role) {
+                        client.setRoleStatus(role, 'WAITING')
+                    })
+                    this.checkedRoles = []
+                    this.message = null
+                }
+                if (json.error) {
+                    this.error = json.error
+                }
+            }).catch((error) => {
+                this.asking = false
+                this.error = 'SERVER ERROR'
+            })
+        },
         getOrganisations () {
             console.log('search')
             var url = this.api + '/organizations?nb=500&orderBy=' + encodeURIComponent('o_name ASC');
@@ -182,12 +250,52 @@ svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
 
 </style>
 <style scoped>
-
+.access h1,h2,h3,h4 {
+    color:darkred;
+}
+.access input[type="text"] {
+    min-width:250px;
+}
+.access textarea {
+    min-width:600px;
+    width:600px;
+    height:100px;
+}
+.input-role span {
+    display:inline-block;
+    width:40px;
+    text-align:center;
+}
 label {
     display:inline-block;
     width:180px;
     text-align:right;
     font-weight:700;
     margin-right:5px;
+}
+.access button {
+  margin: 0 0 3px 7px;
+  padding: 3px 12px;
+  text-align: center;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 3px;
+  font-size: 16px;
+  line-height: 1.7;
+  border: None;
+  background: darkred;
+  color: #fff;
+  text-decoration: none;
+  vertical-align: top;
+  cursor: pointer;
+  pointer-events: auto;
+  box-sizing: border-box;
+  box-shadow: 0 1px 5px #000000a6;
+  opacity: .9;
+
+}
+.access button:disabled {
+    opacity:0.4;
+    pointer-events:none;
 }
 </style>
