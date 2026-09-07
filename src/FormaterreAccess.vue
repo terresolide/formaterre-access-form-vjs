@@ -7,7 +7,6 @@
         </div>
         <h2>Your organisation</h2>
         <div><label>Name</label> 
-
         <input type="hidden" v-model="organisation.id" />
         <input v-model="organisation.name" type="text" list="organisations" @input="organisationUpdated($event)" required> *
             <datalist id="organisations">
@@ -45,7 +44,7 @@
         <h2>Motivation for the moderator</h2>
         <textarea v-model="message"></textarea>
        
-        <div style="width:600px;text-align:right;margin-top:20px;"><button :disabled="disabled">Send</button></div>
+        <div style="width:600px;text-align:right;margin-top:20px;"><button :disabled="disabled" @click="accessRequest()">Send</button></div>
     </div>
 </template>
 <script>
@@ -88,6 +87,10 @@ export default {
             if (this.checkedRoles.length === 0) {
                 return true;
             }
+            if (!this.organisation.name || !this.organisation.type) {
+                return true
+            }
+            return false
         }
     },
     mounted () {
@@ -109,16 +112,22 @@ export default {
             var location = URL.parse(window.location.href)
             // remove role "view" if there is role "view download"
              var postdata = {
-                email: user.email,
+                email: this.user.email,
                 app: this.app,
                 domain: location.href,
                 message: this.message,
                 role: this.checkedRoles,
                 lang: this.lang,
-                organizationId: user.organization.id
+                organizationId: this.organisation.id
+            }
+            if (this.organisation.id) {
+                postdata['organizationId'] = this.organisation.id
+            } else {
+                postdata['organization'] = this.organisation.name
+                postdata['organizationType'] = this.organisation.types
             }
             var fdata = new URLSearchParams(postdata)
-            var url = config.state.tools + '/requests/ask'
+            var url =  this.api.replace('/api', '/requests/ask')
             fetch(url,{
                 method: 'POST',
                 body: fdata.toString(),
@@ -161,7 +170,6 @@ export default {
             })
         },
         organisationUpdated (event) {
-            console.log(event)
             this.organisation.id = null
             this.organisation.type = null
             
@@ -255,6 +263,9 @@ svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
 }
 .access input[type="text"] {
     min-width:250px;
+}
+.access input[type="checkbox"] {
+    cursor:pointer;
 }
 .access textarea {
     min-width:600px;
