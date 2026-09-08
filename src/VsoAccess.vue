@@ -9,6 +9,10 @@ const {api, url} = defineProps({
     url: {
         type: String,
         default: 'https://spotgins.formater/sso-test/token.php'
+    },
+    withInstitution: {
+        type: String,
+        default:false
     }
 
 })
@@ -23,5 +27,5 @@ function  getToken () {
 onMounted(() => {getToken()})
 </script>
 <template>
-    <formaterre-access :api="api" :user="data.user" :with-institution="true"></formaterre-access>
+    <formaterre-access :api="api" :user="data.user" :with-institution="withInstitution"></formaterre-access>
 </template>

@@ -160,12 +160,10 @@ export default {
                 if (json.success) {
                     this.success = 'Your request has been successfully recorded.<br />An email has been sent to you. '
                 }
-                console.log(json)
                 if (json.success && json.roles) {
                     var roles = this.roles
                     json.roles.forEach(function (role) {
                         var tab = role.split('.')
-                        console.log(tab)
                         var index = roles[tab[0]].roles.findIndex(r => r.name === tab[1])
                         roles[tab[0]].roles[index].status = 'WAITING'
                       
@@ -188,7 +186,6 @@ export default {
             })
         },
         getOrganisations () {
-            console.log('search')
             var url = this.api + '/organizations?nb=500&orderBy=' + encodeURIComponent('o_name ASC');
             if (this.organisation.name) {
                 url += '&q=' + this.organisation.name
@@ -255,19 +252,11 @@ export default {
             })
             .then(resp => resp.json())
             .then(json => {
-                console.log(json)
                 if (json.organization && json.organization.id) {
                     this.organisation = json.organization
                 }
                 this.clients = json.clients
                 this.roles = json.roles
-                for(var client in this.roles) {
-                    if (client  !== 'global') {
-                        this.roles[client].roles.forEach((role) => {
-                            console.log(role)
-                        })
-                    }
-                }
 
             })
         },
