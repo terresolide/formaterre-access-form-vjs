@@ -23,5 +23,5 @@ function  getToken () {
 onMounted(() => {getToken()})
 </script>
 <template>
-    <formaterre-access :api="api" :user="data.user" :with-institution="false"></formaterre-access>
+    <formaterre-access :api="api" :user="data.user" :with-institution="true"></formaterre-access>
 </template>

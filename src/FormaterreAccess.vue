@@ -8,7 +8,7 @@
         <h1>Access request</h1>
         <div>Hello <b>{{ user.email }}</b>!</div>
         <div style="margin-top:10px;display:block;">
-            <template v-if="withInstituion">
+            <template v-if="withInstitution">
             Complete the information about your organization if necessary, then select the access rights you require.
             </template>
             <template v-else>
@@ -107,7 +107,7 @@ export default {
             if (this.checkedRoles.length === 0) {
                 return true;
             }
-            if (!this.organisation.name || !this.organisation.type) {
+            if (this.withInstitution && (!this.organisation.name || !this.organisation.type)) {
                 return true
             }
             return false
@@ -139,12 +139,12 @@ export default {
                 role: this.checkedRoles,
                 lang: this.lang
             }
-            // if (this.organisation.id) {
-            //     postdata['organizationId'] = this.organisation.id
-            // } else {
-            //     postdata['organization'] = this.organisation.name
-            //     postdata['organizationType'] = this.organisation.types
-            // }
+            if (this.organisation.id) {
+                postdata['organizationId'] = this.organisation.id
+            } else {
+                postdata['organization'] = this.organisation.name
+                postdata['organizationType'] = this.organisation.type
+            }
             var fdata = new URLSearchParams(postdata)
             var url =  this.api.replace('/api', '/requests/ask')
             fetch(url,{
