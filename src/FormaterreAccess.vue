@@ -5,7 +5,7 @@
     <div class="message success" v-if="success" @click="success=null" v-html="success"></div>
     <div class="message error" v-if="error" @click="error=null" v-html="error"></div>
     <div class="access" v-if="user" @click="resetMessage()">
-        <h1>Access request</h1>
+        <h1 :style="{color:color}">Access request</h1>
         <div>Hello <b>{{ user.email }}</b>!</div>
         <div style="margin-top:10px;display:block;">
             <template v-if="withInstitution">
@@ -16,7 +16,7 @@
             </template>
         </div>
         <span v-if="withInstitution">
-            <h2>Your organisation</h2>
+            <h2 :style="{color:color}">Your organisation</h2>
         
             <div><label>Name</label> 
             <input type="hidden" v-model="organisation.id" />
@@ -34,9 +34,9 @@
                 </select>
             </div>
         </span>
-        <h2>Your access right</h2>
+        <h2 :style="{color:color}">Your access right</h2>
          <template v-for="client, name in roles">
-            <div v-if="name != 'global'"><h4>{{ client.title[lang] || name}}</h4>
+            <div v-if="name != 'global'" ><h4 :style="{color:color}">{{ client.title[lang] || name}}</h4>
                 <div class="input-role" v-for="role in client.roles">
                     <label :title="role.description.en">{{ role.title.en || role.name }}</label> 
                     <span v-if="user.roles && user.roles[name] &&user.roles[name].indexOf(role.name) >= 0" style="color:green;" >
@@ -55,10 +55,10 @@
 
         </template>
         
-        <h2>Motivation for the moderator</h2>
+        <h2 :style="{color:color}">Motivation for the moderator</h2>
         <textarea v-model="message"></textarea>
        
-        <div style="width:600px;text-align:right;margin-top:20px;"><button :disabled="disabled" @click="accessRequest()">Send</button></div>
+        <div style="width:600px;text-align:right;margin-top:20px;"><button :disabled="disabled" :style="{background:color}" @click="accessRequest()">Send</button></div>
     </div>
 </template>
 <script>
@@ -86,6 +86,10 @@ export default {
         api: {
             type: String,
             default: 'https://catalog.formater/api'
+        },
+        color: {
+            type: String,
+            default: '#8b0000'
         }
     },
     data () {
